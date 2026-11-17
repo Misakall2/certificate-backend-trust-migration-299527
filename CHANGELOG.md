@@ -1,6 +1,35 @@
 Forge ChangeLog
 ===============
 
+## Unreleased
+
+### Added
+- Selectable certificate signature verification backends. Certificate
+  signature verification (used by `pki.verifyCertificateChain()` and the
+  new `pki.verifyCertificateSignature()`) can now run on one of two
+  explicitly selected backends:
+  - `forge` (default): the existing pure-JavaScript implementation,
+    unchanged, works in all runtimes including browsers.
+  - `node`: delegates signature verification to the Node.js built-in
+    `crypto` module (`crypto.X509Certificate`; requires Node.js >=
+    15.6). Accepts forge certificates, PEM, and DER input, uses a fixed
+    signature algorithm allowlist (RSA/ECDSA with SHA-2, RSASSA-PSS with
+    constrained parameters), and can verify algorithms the pure-JS
+    parser cannot represent (eg: ECDSA).
+  - Chain policy checks (validity, issuer matching, key usage, basic
+    constraints, path length, name constraints) are shared by both
+    backends so results are comparable; certificate issuance is
+    unchanged. There is no implicit fallback between backends; typed
+    errors (`pki.certificateVerificationError`) distinguish an
+    unavailable backend, parse failures, unsupported algorithms, and
+    policy-violating signature parameters from ordinary signature
+    mismatches. New options for `pki.verifyCertificateChain()`:
+    `verificationBackend` and `maxIssuerCandidates` (a deterministic
+    bound for same-name/cross-signed issuer candidates, default 8).
+  - See docs/certificate-verification-backends.md for runtime and
+    algorithm scope, error codes, caching semantics, differences
+    between backends, and rollback notes.
+
 ## 1.4.3 - 2026-11-03
 
 ### Security

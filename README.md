@@ -1163,6 +1163,20 @@ var issuerCert = caStore.getIssuer(subjectCert);
 // revocation, certificate policies, extended key usage or host names)
 pki.verifyCertificateChain(caStore, chain, customVerifyCallback);
 
+// verifies a certificate chain using the Node.js built-in crypto backend
+// for signature verification (Node.js >= 15.6; the default 'forge'
+// backend is pure JavaScript and also works in browsers); see
+// docs/certificate-verification-backends.md for backend selection,
+// supported algorithms, error codes, and migration notes
+pki.verifyCertificateChain(caStore, chain, {
+  verificationBackend: 'node',
+  validityCheckDate: new Date()
+});
+
+// verifies a single certificate signature with a selected backend
+var signatureValid = pki.verifyCertificateSignature(
+  issuerCert, cert, {backend: 'node'});
+
 // signs a certificate using the given private key
 cert.sign(privateKey);
 
